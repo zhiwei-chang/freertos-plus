@@ -87,7 +87,7 @@ void ps_command(int n, char *argv[]){
 	vTaskList(buf);
         fio_printf(1, "\n\rName          State   Priority  Stack  Num\n\r");
         fio_printf(1, "*******************************************\n\r");
-	fio_printf(1, "%s\r\n", buf + 2);	
+	fio_printf(1, "%s\r\n", buf + 2);
 }
 
 void cat_command(int n, char *argv[]){
@@ -126,7 +126,7 @@ void host_command(int n, char *argv[]){
         command[len - 1] = '\0';
         rnt=host_action(SYS_SYSTEM, command);
         fio_printf(1, "\r\nfinish with exit code %d.\r\n", rnt);
-    } 
+    }
     else {
         fio_printf(2, "\r\nUsage: host 'command'\r\n");
     }
@@ -147,9 +147,24 @@ void test_command(int n, char *argv[]) {
     fio_printf(1, "\r\n");
 
     handle = host_action(SYS_OPEN, "output/syslog", 8);
-    if(handle == -1) {
-        fio_printf(1, "Open file error!\n\r");
-        return;
+    if(n>1){
+        if(*argv[1]=='-' && *(argv[1]+1)=='f'){
+
+            if(0==host_action(SYS_SYSTEM, "mkdir output")){
+
+                fio_printf(1, "Create output directory.\r\n");
+                handle = host_action(SYS_OPEN, "output/syslog", 8);
+                if(handle==-1){
+                    fio_printf(1, "Open file error!\n\r");
+                    return;
+                }
+            }
+        }
+    }else{
+       if(handle == -1) {
+            fio_printf(1, "Open file error!\n\r");
+            return;
+       }
     }
 
     char *buffer = "Test host_write function which can write data to output/syslog\n";
@@ -171,5 +186,5 @@ cmdfunc *do_command(const char *cmd){
 		if(strcmp(cl[i].name, cmd)==0)
 			return cl[i].fptr;
 	}
-	return NULL;	
+	return NULL;
 }
