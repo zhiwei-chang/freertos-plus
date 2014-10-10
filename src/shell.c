@@ -146,25 +146,34 @@ void test_command(int n, char *argv[]) {
 
     fio_printf(1, "\r\n");
 
-    handle = host_action(SYS_OPEN, "output/syslog", 8);
     if(n>1){
-        if(*argv[1]=='-' && *(argv[1]+1)=='f'){
+        if(0==strcmp(argv[1], "-f" )){
 
-            if(0==host_action(SYS_SYSTEM, "mkdir output")){
+            handle = host_action(SYS_SYSTEM, "test -d output/", 8);
 
-                fio_printf(1, "Create output directory.\r\n");
-                handle = host_action(SYS_OPEN, "output/syslog", 8);
-                if(handle==-1){
-                    fio_printf(1, "Open file error!\n\r");
-                    return;
+            if(0<handle){
+                if(0==host_action(SYS_SYSTEM, "mkdir output")){
+                    handle = host_action(SYS_OPEN, "output/syslog", 8);
                 }
             }
+            else{
+                fio_printf(1, "The output/syslog is exist.\r\n");
+                return;
+            }
         }
-    }else{
-       if(handle == -1) {
-            fio_printf(1, "Open file error!\n\r");
+        else{
+            fio_printf(1, "Usage: test [-f]\r\n");
             return;
-       }
+        }
+    }
+    else{
+        handle = host_action(SYS_OPEN, "output/syslog", 8);
+    }
+
+    if(handle==-1){
+        fio_printf(1, "Open file error!\n\r");
+        fio_printf(1, "Try \'test -f\' to creat file.\n\r");
+        return;
     }
 
     char *buffer = "Test host_write function which can write data to output/syslog\n";
